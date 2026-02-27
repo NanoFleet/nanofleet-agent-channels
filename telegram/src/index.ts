@@ -55,7 +55,9 @@ function loadConfig(): Config {
     AGENT_ID,
     LOG_LEVEL,
     allowedUsers,
-    notificationUserId: Number.isNaN(NOTIFICATION_USER_ID) ? undefined : NOTIFICATION_USER_ID,
+    notificationUserId: Number.isNaN(NOTIFICATION_USER_ID)
+      ? undefined
+      : NOTIFICATION_USER_ID,
   };
 }
 

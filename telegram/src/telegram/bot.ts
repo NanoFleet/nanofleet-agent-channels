@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { type Context, Telegraf } from "telegraf";
 import type { AgentClient } from "../agent/client.js";
 
@@ -72,8 +72,13 @@ export class TelegramChannel {
   private loadThreadOverrides(): void {
     if (existsSync(this.threadsFilePath)) {
       try {
-        this.threadOverrides = JSON.parse(readFileSync(this.threadsFilePath, "utf-8"));
-        log("debug", `Loaded ${Object.keys(this.threadOverrides).length} thread override(s) from disk`);
+        this.threadOverrides = JSON.parse(
+          readFileSync(this.threadsFilePath, "utf-8"),
+        );
+        log(
+          "debug",
+          `Loaded ${Object.keys(this.threadOverrides).length} thread override(s) from disk`,
+        );
       } catch {
         log("warn", "Failed to parse threads.json, starting fresh");
         this.threadOverrides = {};
@@ -82,7 +87,10 @@ export class TelegramChannel {
   }
 
   private saveThreadOverrides(): void {
-    writeFileSync(this.threadsFilePath, JSON.stringify(this.threadOverrides, null, 2));
+    writeFileSync(
+      this.threadsFilePath,
+      JSON.stringify(this.threadOverrides, null, 2),
+    );
   }
 
   private getThreadId(userId: number): string {
@@ -96,16 +104,30 @@ export class TelegramChannel {
     this.bot.on("text", this.handleMessage.bind(this));
 
     if (this.config.notificationUserId) {
-      this.unsubscribeNotifications = this.config.agentClient.subscribeNotifications(
-        (notification) => {
-          log("info", `Notification received from agent: ${notification.text.substring(0, 60)}...`);
-          this.bot.telegram
-            .sendMessage(this.config.notificationUserId!, notification.text)
-            .catch((err) => log("error", "Failed to send notification:", err));
-        },
-        (err) => log("warn", "Notification stream error (will reconnect automatically):", err),
+      this.unsubscribeNotifications =
+        this.config.agentClient.subscribeNotifications(
+          (notification) => {
+            log(
+              "info",
+              `Notification received from agent: ${notification.text.substring(0, 60)}...`,
+            );
+            this.bot.telegram
+              .sendMessage(this.config.notificationUserId, notification.text)
+              .catch((err) =>
+                log("error", "Failed to send notification:", err),
+              );
+          },
+          (err) =>
+            log(
+              "warn",
+              "Notification stream error (will reconnect automatically):",
+              err,
+            ),
+        );
+      log(
+        "info",
+        `Notifications enabled — will forward to user ${this.config.notificationUserId}`,
       );
-      log("info", `Notifications enabled — will forward to user ${this.config.notificationUserId}`);
     } else {
       log("info", "NOTIFICATION_USER_ID not set — notifications disabled");
     }
@@ -219,12 +241,16 @@ export class TelegramChannel {
 
       case "/new": {
         try {
-          const newThreadId = await this.config.agentClient.createThread(`telegram:${userId}`);
+          const newThreadId = await this.config.agentClient.createThread(
+            `telegram:${userId}`,
+          );
           this.threadOverrides[userId] = newThreadId;
           this.saveThreadOverrides();
           await ctx.reply("🔄 New conversation started!");
         } catch {
-          await ctx.reply("Failed to start a new conversation. Please try again.");
+          await ctx.reply(
+            "Failed to start a new conversation. Please try again.",
+          );
         }
         break;
       }

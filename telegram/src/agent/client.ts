@@ -62,7 +62,10 @@ export class AgentClient {
     return response.data.thread.id;
   }
 
-  subscribeNotifications(onNotification: (n: AgentNotification) => void, onError?: (err: unknown) => void): () => void {
+  subscribeNotifications(
+    onNotification: (n: AgentNotification) => void,
+    onError?: (err: unknown) => void,
+  ): () => void {
     const url = `${this.client.defaults.baseURL}/api/agents/${this.agentId}/notifications/stream`;
     const es = new EventSource(url);
 
