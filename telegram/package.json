@@ -1,0 +1,25 @@
+{
+  "name": "nanofleet-agent-channels",
+  "version": "0.1.0",
+  "description": "Channel adapters for NanoFleet Agent (Telegram, Discord, Webhook...)",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun",
+    "lint": "biome check .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "axios": "^1.13.6",
+    "dotenv": "^17.3.1",
+    "eventsource": "^4.1.0",
+    "telegraf": "^4.16.3",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/bun": "^1.1.17",
+    "@types/eventsource": "^3.0.0"
+  }
+}
