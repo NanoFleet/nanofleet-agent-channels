@@ -1,12 +1,10 @@
 # NanoFleet Agent Channels
 
-> Communication channel adapters for connecting external platforms to NanoFleet Agent.
+> Communication channel adapters for connecting external platforms to [NanoFleet Agent](https://github.com/NanoFleet/nanofleet-agent).
 
 ## Overview
 
-This repository contains channel adapters that connect various communication platforms to [NanoFleet Agent](https://github.com/NanoFleet/nanofleet-agent). Each channel normalizes incoming messages and forwards them to the agent via HTTP/SSE.
-
-## Architecture
+Each channel adapter bridges an external platform and a `nanofleet-agent` instance. It normalizes incoming messages and forwards them to the agent via HTTP/SSE — the agent has no knowledge of which channel is calling it.
 
 ```
 ┌─────────────┐     ┌──────────────────┐     ┌─────────────────┐
@@ -20,60 +18,35 @@ This repository contains channel adapters that connect various communication pla
 Each channel:
 1. Receives messages from a platform (Telegram update, Discord event, HTTP webhook...)
 2. Normalizes them into the agent's message format
-3. Calls `POST /api/agents/:id/stream` (or `/generate`)
+3. Calls `POST /api/agents/main/stream`
 4. Sends the streamed response back to the platform
 
-The agent has no knowledge of which channel is calling it.
+> **Using NanoFleet?** Channels are deployed and managed from the web dashboard — no manual configuration needed. This repo is for standalone use with `nanofleet-agent`.
 
 ## Available Channels
 
-| Channel | Status | Description |
-|---------|--------|-------------|
-| [telegram](./telegram/) | ✅ Ready | Telegram bot adapter |
-| discord | 🔜 Planned | Discord bot adapter |
-| webhook | 🔜 Planned | Generic HTTP webhook adapter |
+| Channel | Status | Image |
+|---------|--------|-------|
+| [telegram](./telegram/) | ✅ Ready | `ghcr.io/nanofleet/nanofleet-channel-telegram:latest` |
+| discord | 🔜 Planned | — |
+| webhook | 🔜 Planned | — |
 
-## Prerequisites
+## Usage
 
-- [Bun](https://bun.sh) runtime (v1.x or later)
-- A running instance of [nanofleet-agent](https://github.com/NanoFleet/nanofleet-agent)
+See each channel's README for configuration details:
 
-## Quick Start
+- [telegram/README.md](./telegram/README.md)
 
-### Telegram
+For Docker deployment alongside `nanofleet-agent`, see the commented channel section in [nanofleet-agent/docker-compose.yml](https://github.com/NanoFleet/nanofleet-agent/blob/main/docker-compose.yml).
 
-```bash
-cd telegram
-cp .env.example .env
-# Edit .env with your TELEGRAM_BOT_TOKEN
-bun install
-bun run dev
-```
+## Common Variables
 
-See [telegram/README.md](./telegram/README.md) for detailed instructions.
-
-## Development
-
-Each channel is a standalone Bun project with its own dependencies and configuration.
-
-```
-nanofleet-agent-channels/
-├── telegram/
-│   ├── src/
-│   │   ├── index.ts          # Entry point
-│   │   ├── agent/            # AgentClient for HTTP communication
-│   │   ├── telegram/         # Telegram bot implementation
-│   │   └── types/            # Shared TypeScript types
-│   ├── package.json
-│   ├── Dockerfile
-│   └── README.md
-├── .gitignore
-└── README.md
-```
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `AGENT_URL` | URL of the nanofleet-agent instance | `http://agent:4111` |
+| `AGENT_ID` | Agent ID to send messages to | `main` |
 
 ## Adding a New Channel
-
-To add a new channel (e.g., Discord):
 
 1. Create a new directory: `mkdir discord && cd discord`
 2. Initialize with `bun init`
@@ -86,17 +59,5 @@ interface Channel {
 }
 ```
 
-4. Add configuration to `.env.example`
-5. Update this README with the new channel status
-
-## Configuration
-
-Channels are configured via environment variables. See each channel's README for specific variables.
-
-### Common Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `AGENT_URL` | URL of the nanofleet-agent instance | `http://agent:4111` |
-| `AGENT_ID` | Agent ID to send messages to | `main` |
-| `LOG_LEVEL` | Log level: `debug`, `info`, `warn`, `error` | `info` |
+4. Add a `Dockerfile`, `.env.example`, and `README.md`
+5. Update this README with the new channel
