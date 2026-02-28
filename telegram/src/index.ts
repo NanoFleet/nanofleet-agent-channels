@@ -106,8 +106,13 @@ async function main(): Promise<void> {
 
 main().catch((error) => {
   const message = error instanceof Error ? error.message : String(error);
-  if (message.includes("401") || message.toLowerCase().includes("unauthorized")) {
-    console.error("[FATAL] Invalid Telegram bot token. Check your TELEGRAM_BOT_TOKEN.");
+  if (
+    message.includes("401") ||
+    message.toLowerCase().includes("unauthorized")
+  ) {
+    console.error(
+      "[FATAL] Invalid Telegram bot token. Check your TELEGRAM_BOT_TOKEN.",
+    );
   } else {
     console.error("[FATAL] Failed to start:", error);
   }
