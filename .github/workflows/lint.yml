@@ -1,0 +1,27 @@
+name: Lint
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  biome-telegram:
+    name: Biome check (telegram)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        working-directory: telegram
+        run: bun install
+
+      - name: Run Biome
+        working-directory: telegram
+        run: bun run lint
