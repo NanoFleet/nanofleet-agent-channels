@@ -197,9 +197,11 @@ export class TelegramChannel {
         resourceId: `telegram:${userId}`,
       });
 
-      await ctx.reply(response.text, {
-        parse_mode: "Markdown",
-      });
+      try {
+        await ctx.reply(response.text, { parse_mode: "Markdown" });
+      } catch {
+        await ctx.reply(response.text);
+      }
 
       if (response.usage) {
         const usageText = `[tokens: ${response.usage.inputTokens} in + ${response.usage.outputTokens} out`;
