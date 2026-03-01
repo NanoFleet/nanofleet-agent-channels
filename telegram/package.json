@@ -1,6 +1,6 @@
 {
   "name": "nanofleet-agent-channels",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Channel adapters for NanoFleet Agent (Telegram, Discord, Webhook...)",
   "type": "module",
   "scripts": {
