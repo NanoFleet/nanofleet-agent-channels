@@ -9,4 +9,7 @@ RUN bun install --frozen-lockfile
 
 COPY src/ ./src/
 
+ARG VERSION=dev
+LABEL com.nanofleet.version=${VERSION}
+
 CMD ["bun", "run", "src/index.ts"]
