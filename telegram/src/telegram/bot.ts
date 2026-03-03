@@ -97,6 +97,32 @@ export class TelegramChannel {
     return this.threadOverrides[userId] ?? `telegram:${userId}`;
   }
 
+  private async handleNotification(text: string): Promise<void> {
+    const userId = this.config.notificationUserId;
+    if (!userId) return;
+
+    try {
+      const payload = JSON.parse(text);
+      if (payload.type === "document" && payload.url && payload.filename) {
+        log("info", `Fetching document: ${payload.url}`);
+        const res = await fetch(payload.url, {
+          signal: AbortSignal.timeout(30_000),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const buffer = Buffer.from(await res.arrayBuffer());
+        await this.bot.telegram.sendDocument(userId, {
+          source: buffer,
+          filename: payload.filename,
+        });
+        return;
+      }
+    } catch {
+      // Not a JSON document payload — fall through to sendMessage
+    }
+
+    await this.bot.telegram.sendMessage(userId, text);
+  }
+
   async start(): Promise<void> {
     log("info", "Starting Telegram channel...");
 
@@ -111,11 +137,9 @@ export class TelegramChannel {
               "info",
               `Notification received from agent: ${notification.text.substring(0, 60)}...`,
             );
-            this.bot.telegram
-              .sendMessage(this.config.notificationUserId, notification.text)
-              .catch((err) =>
-                log("error", "Failed to send notification:", err),
-              );
+            this.handleNotification(notification.text).catch((err) =>
+              log("error", "Failed to handle notification:", err),
+            );
           },
           (err) =>
             log(
