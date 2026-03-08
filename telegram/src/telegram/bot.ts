@@ -36,6 +36,22 @@ function log(level: string, message: string, ...args: unknown[]): void {
   }
 }
 
+const TELEGRAM_MAX_LENGTH = 4096;
+
+function splitText(text: string): string[] {
+  if (text.length <= TELEGRAM_MAX_LENGTH) return [text];
+  const chunks: string[] = [];
+  let remaining = text;
+  while (remaining.length > TELEGRAM_MAX_LENGTH) {
+    let splitAt = remaining.lastIndexOf("\n", TELEGRAM_MAX_LENGTH);
+    if (splitAt <= 0) splitAt = TELEGRAM_MAX_LENGTH;
+    chunks.push(remaining.slice(0, splitAt));
+    remaining = remaining.slice(splitAt).trimStart();
+  }
+  if (remaining.length > 0) chunks.push(remaining);
+  return chunks;
+}
+
 function extractTextContent(ctx: Context): string | null {
   if (ctx.message && "text" in ctx.message) {
     return ctx.message.text;
@@ -120,7 +136,9 @@ export class TelegramChannel {
       // Not a JSON document payload — fall through to sendMessage
     }
 
-    await this.bot.telegram.sendMessage(userId, text);
+    for (const chunk of splitText(text)) {
+      await this.bot.telegram.sendMessage(userId, chunk);
+    }
   }
 
   async start(): Promise<void> {
@@ -221,10 +239,12 @@ export class TelegramChannel {
         resourceId: `telegram:${userId}`,
       });
 
-      try {
-        await ctx.reply(response.text, { parse_mode: "Markdown" });
-      } catch {
-        await ctx.reply(response.text);
+      for (const chunk of splitText(response.text)) {
+        try {
+          await ctx.reply(chunk, { parse_mode: "Markdown" });
+        } catch {
+          await ctx.reply(chunk);
+        }
       }
 
       if (response.usage) {
